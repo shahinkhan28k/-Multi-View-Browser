@@ -10,6 +10,7 @@ import { HomeView } from './components/HomeView';
 import { HistoryView } from './components/HistoryView';
 import { GridView } from './components/GridView';
 import { PlaceholderView } from './components/PlaceholderView';
+import { DeveloperView } from './components/DeveloperView';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -80,16 +81,17 @@ export default function App() {
           />
         ) : <HomeView onOpen={handleOpen} />;
       case 'Blogs':
-      case 'Game':
       case 'Setting':
         return <PlaceholderView type={activeView} />;
+      case 'Developer':
+        return <DeveloperView />;
       default:
         return <HomeView onOpen={handleOpen} />;
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden select-none">
+    <div className="flex flex-col h-screen bg-slate-100 overflow-hidden select-none">
       <main className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div

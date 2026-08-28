@@ -1,5 +1,18 @@
 
-export type ViewType = 'Home' | 'History' | 'Blogs' | 'Game' | 'Setting' | 'Grid';
+export type ViewType = 'Home' | 'History' | 'Blogs' | 'Developer' | 'Setting' | 'Grid';
+
+export interface SocialLinks {
+  banner: string;
+  name: string;
+  bio: string;
+  passcode: string;
+  facebook: string;
+  facebookPage: string;
+  tiktok: string;
+  telegram: string;
+  youtube: string;
+  instagram: string;
+}
 
 export interface ProxyInfo {
   id: number;

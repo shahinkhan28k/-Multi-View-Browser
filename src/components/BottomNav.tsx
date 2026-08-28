@@ -1,4 +1,4 @@
-import { Home, History, BookOpen, Gamepad2, Settings } from 'lucide-react';
+import { Home, History, BookOpen, User, Settings } from 'lucide-react';
 import { ViewType } from '../types';
 
 interface BottomNavProps {
@@ -11,7 +11,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
     { id: 'Home', icon: Home, label: 'Home' },
     { id: 'History', icon: History, label: 'History' },
     { id: 'Blogs', icon: BookOpen, label: 'Blogs' },
-    { id: 'Game', icon: Gamepad2, label: 'Game' },
+    { id: 'Developer', icon: User, label: 'Developer' },
     { id: 'Setting', icon: Settings, label: 'Setting' },
   ];
 

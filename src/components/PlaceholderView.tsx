@@ -36,16 +36,6 @@ export function PlaceholderView({ type }: PlaceholderViewProps) {
         { title: 'The Future of Webview Containers', date: 'Sep 29, 2024' },
       ]
     },
-    Game: {
-      icon: Gamepad2,
-      title: 'Browser Mini-Games',
-      description: 'Quick casual games to play while monitoring your streams.',
-      items: [
-        { title: 'Tetris Classic', category: 'Puzzle' },
-        { title: 'Snake X', category: 'Arcade' },
-        { title: 'Sudoku Master', category: 'Logic' },
-      ]
-    },
     Setting: {
       icon: Settings,
       title: 'App Settings',
