@@ -91,7 +91,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-100 overflow-hidden select-none">
+    <div className="flex flex-col h-screen bg-[#0a0f1a] text-gray-100 overflow-hidden select-none">
       <main className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div

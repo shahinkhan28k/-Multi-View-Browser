@@ -16,17 +16,17 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 px-4 pb-safe shadow-lg z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#111827] border-t border-white/5 flex justify-around items-center py-2 px-4 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50">
       {navItems.map(({ id, icon: Icon, label }) => (
         <button
           key={id}
           onClick={() => onViewChange(id as ViewType)}
-          className={`flex flex-col items-center gap-1 transition-colors ${
-            activeView === id ? 'text-blue-600' : 'text-gray-500'
+          className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+            activeView === id ? 'text-blue-500 scale-110' : 'text-gray-500'
           }`}
         >
           <Icon size={20} strokeWidth={activeView === id ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">{label}</span>
+          <span className={`text-[10px] font-bold ${activeView === id ? 'opacity-100' : 'opacity-60'}`}>{label}</span>
         </button>
       ))}
     </nav>

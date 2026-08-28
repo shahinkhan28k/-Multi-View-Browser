@@ -32,11 +32,11 @@ export function HistoryView({ history, onOpen, onClear, onRemove }: HistoryViewP
 
   return (
     <div className="flex flex-col h-full p-6 pb-24 max-w-lg mx-auto overflow-y-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Session History</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-black text-white tracking-tight">History</h2>
         <button 
           onClick={onClear}
-          className="text-red-500 text-sm font-semibold flex items-center gap-1 px-3 py-1 bg-red-50 rounded-lg"
+          className="text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all"
         >
           <Trash2 size={14} />
           Clear All
@@ -47,34 +47,38 @@ export function HistoryView({ history, onOpen, onClear, onRemove }: HistoryViewP
         {history.map((item) => (
           <div 
             key={item.id} 
-            className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group"
+            className="p-5 bg-[#161e2d] rounded-2xl border border-white/5 shadow-xl hover:border-white/10 transition-all relative group overflow-hidden"
           >
-            <div className="flex flex-col gap-2 pr-12">
-              <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                <Clock size={10} />
+            <div className="flex flex-col gap-3 pr-14 relative z-10">
+              <div className="flex items-center gap-3 text-[10px] text-gray-500 font-black uppercase tracking-[0.15em]">
+                <Clock size={12} className="text-blue-500" />
                 {formatDate(item.timestamp)}
-                <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                  {item.count} Screens
+                <span className="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-[9px] border border-blue-500/20">
+                  {item.count} SCREENS
                 </span>
               </div>
-              <p className="text-sm font-medium text-gray-800 truncate leading-relaxed">
+              <p className="text-sm font-bold text-gray-300 truncate leading-relaxed">
                 {item.url}
               </p>
             </div>
 
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <button
                 onClick={() => onOpen(item.url, item.count)}
-                className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+                className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-blue-900/40 active:scale-90 transition-all"
               >
-                <Play size={18} fill="currentColor" />
+                <Play size={20} fill="currentColor" />
               </button>
               <button
                 onClick={() => onRemove(item.id)}
-                className="w-8 h-8 text-gray-300 hover:text-red-500 flex items-center justify-center transition-colors"
+                className="w-10 h-10 text-gray-600 hover:text-red-500 flex items-center justify-center transition-colors hover:bg-red-500/5 rounded-xl"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
               </button>
+            </div>
+            
+            <div className="absolute -left-4 -bottom-4 opacity-[0.02] transform rotate-12">
+               <HistoryIcon size={100} />
             </div>
           </div>
         ))}

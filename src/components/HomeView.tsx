@@ -29,8 +29,10 @@ export function HomeView({ onOpen }: HomeViewProps) {
   return (
     <div className="flex flex-col gap-8 p-6 pb-24 max-w-lg mx-auto h-full overflow-y-auto">
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Multi View Browser</h1>
-        <p className="text-sm text-gray-500">View multiple YouTube streams simultaneously.</p>
+        <h1 className="text-3xl font-black text-white tracking-tight">Multi View Browser</h1>
+        <p className="text-sm text-gray-400 font-medium leading-relaxed">
+          Watch multiple YouTube streams simultaneously with optimized performance.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -40,12 +42,12 @@ export function HomeView({ onOpen }: HomeViewProps) {
             placeholder="Enter YouTube URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="w-full h-14 pl-4 pr-24 rounded-2xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none text-gray-800 font-medium"
+            className="w-full h-14 pl-4 pr-24 rounded-2xl border-2 border-white/5 bg-white/5 focus:bg-white/10 focus:border-blue-500 transition-all outline-none text-white font-medium placeholder:text-gray-600"
           />
           <button
             type="button"
             onClick={handlePaste}
-            className="absolute right-2 top-2 bottom-2 px-4 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 text-sm font-semibold text-gray-600 active:scale-95 transition-transform"
+            className="absolute right-2 top-2 bottom-2 px-4 bg-white/10 hover:bg-white/20 rounded-xl flex items-center gap-2 text-sm font-bold text-white active:scale-95 transition-all backdrop-blur-md"
           >
             <ClipboardPaste size={16} />
             Paste
@@ -53,17 +55,17 @@ export function HomeView({ onOpen }: HomeViewProps) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <label className="text-sm font-semibold text-gray-700 px-1">Select Screen Count</label>
+          <label className="text-xs font-black text-gray-500 uppercase tracking-widest px-1">Select Screen Count</label>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {counts.map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setCount(c)}
-                className={`flex-shrink-0 min-w-[60px] h-10 rounded-xl font-bold text-sm border-2 transition-all ${
+                className={`flex-shrink-0 min-w-[65px] h-11 rounded-xl font-black text-sm border-2 transition-all ${
                   count === c
-                    ? 'border-blue-500 bg-blue-50 text-blue-600'
-                    : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'
+                    ? 'border-blue-600 bg-blue-600/20 text-blue-400'
+                    : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/10'
                 }`}
               >
                 {c}
@@ -78,7 +80,7 @@ export function HomeView({ onOpen }: HomeViewProps) {
               value={count}
               onChange={(e) => setCount(Math.min(1000, Math.max(1, Number(e.target.value))))}
               placeholder="Custom count (max 1000)"
-              className="w-full h-10 px-4 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full h-12 px-4 rounded-xl border-2 border-white/5 bg-white/5 text-white text-sm font-bold focus:border-blue-500 outline-none transition-all"
             />
           </div>
         </div>
@@ -86,17 +88,17 @@ export function HomeView({ onOpen }: HomeViewProps) {
         <motion.button
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full h-14 bg-blue-600 rounded-2xl text-white font-bold text-lg shadow-xl shadow-blue-200 flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
+          className="w-full h-15 bg-blue-600 rounded-2xl text-white font-black text-lg shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3 hover:bg-blue-500 transition-all"
         >
-          <Play size={20} fill="currentColor" />
-          Open Now
+          <Play size={22} fill="currentColor" />
+          START SESSION
         </motion.button>
       </form>
 
-      <div className="mt-4 p-4 bg-yellow-50 rounded-2xl border border-yellow-100">
-        <h3 className="text-sm font-bold text-yellow-800 mb-1">Performance Tip</h3>
-        <p className="text-xs text-yellow-700 leading-relaxed">
-          Running 100+ screens uses significant memory. We've implemented lazy-loading, but sessions over 500 are recommended for high-end desktop browsers only.
+      <div className="mt-4 p-5 bg-yellow-500/10 rounded-2xl border border-yellow-500/20">
+        <h3 className="text-xs font-black text-yellow-500 uppercase tracking-widest mb-1">Performance Tip</h3>
+        <p className="text-xs text-yellow-500/80 leading-relaxed font-medium">
+          Running 100+ screens uses significant memory. We've implemented lazy-loading, but sessions over 500 are recommended for high-end devices only.
         </p>
       </div>
     </div>

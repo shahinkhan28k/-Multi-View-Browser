@@ -49,67 +49,71 @@ export function PlaceholderView({ type }: PlaceholderViewProps) {
   const Icon = content.icon;
 
   return (
-    <div className="flex flex-col h-full p-6 pb-24 max-w-lg mx-auto overflow-y-auto">
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-          <Icon size={32} />
+    <div className="flex flex-col h-full p-6 pb-24 max-w-lg mx-auto overflow-y-auto bg-[#0a0f1a]">
+      <div className="flex flex-col gap-6 mb-10">
+        <div className="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center text-blue-500 shadow-inner">
+          <Icon size={40} strokeWidth={2.5} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-          <p className="text-sm text-gray-500">{content.description}</p>
+          <h2 className="text-3xl font-black text-white tracking-tight">{content.title}</h2>
+          <p className="text-sm text-gray-500 font-medium mt-2 leading-relaxed">{content.description}</p>
         </div>
       </div>
 
       {type === 'Setting' ? (
-        <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Globe className="text-blue-600" size={20} />
-              <h3 className="font-bold text-gray-800">Proxy Architecture</h3>
+        <div className="flex flex-col gap-8">
+          <div className="bg-[#161e2d] rounded-3xl border border-white/5 p-7 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-500">
+                <Globe size={22} />
+              </div>
+              <h3 className="font-black text-white uppercase tracking-widest text-xs">Proxy Architecture</h3>
             </div>
-            <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed font-medium">
               Configure individual IP/Proxy mapping per view. This simulates different geographical locations for your streams.
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <span className="text-sm font-medium text-gray-700">Proxy Mode</span>
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">Smart Routing</span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                <span className="text-xs font-black text-gray-400 uppercase">Proxy Mode</span>
+                <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-500/20">Smart Routing</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Activity size={14} className={backendStatus === 'Online' ? 'text-green-500' : 'text-gray-400'} />
-                  <span className="text-sm font-medium text-gray-700">Backend API</span>
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-3">
+                  <Activity size={16} className={backendStatus === 'Online' ? 'text-green-500' : 'text-gray-600'} />
+                  <span className="text-xs font-black text-gray-400 uppercase">Backend API</span>
                 </div>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase ${
-                  backendStatus === 'Online' ? 'text-green-600 bg-green-50' : 
-                  backendStatus === 'Offline' ? 'text-red-600 bg-red-50' : 'text-gray-400 bg-gray-100'
+                <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border ${
+                  backendStatus === 'Online' ? 'text-green-400 bg-green-500/10 border-green-500/20' : 
+                  backendStatus === 'Offline' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-gray-500 bg-white/5 border-white/10'
                 }`}>
                   {backendStatus}
                 </span>
               </div>
             </div>
-            <button className="w-full mt-4 h-12 bg-gray-900 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-              <Shield size={16} />
-              Setup Advanced Proxies
+            <button className="w-full mt-6 h-14 bg-white text-[#0a0f1a] rounded-2xl text-sm font-black flex items-center justify-center gap-3 hover:bg-gray-200 transition-all shadow-xl shadow-black/20">
+              <Shield size={20} />
+              SETUP ADVANCED PROXIES
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Cpu className="text-purple-600" size={20} />
-              <h3 className="font-bold text-gray-800">Performance</h3>
+          <div className="bg-[#161e2d] rounded-3xl border border-white/5 p-7 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 bg-purple-600/20 rounded-xl flex items-center justify-center text-purple-500">
+                <Cpu size={22} />
+              </div>
+              <h3 className="font-black text-white uppercase tracking-widest text-xs">Performance</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Hardware Acceleration</span>
-                <div className="w-10 h-6 bg-green-500 rounded-full relative">
-                  <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                <span className="text-xs font-black text-gray-400 uppercase">Hardware Acceleration</span>
+                <div className="w-12 h-7 bg-blue-600 rounded-full relative shadow-lg shadow-blue-900/20">
+                  <div className="absolute right-1 top-1 w-5 h-5 bg-white rounded-full"></div>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Lazy Loading Frames</span>
-                <div className="w-10 h-6 bg-green-500 rounded-full relative">
-                  <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                <span className="text-xs font-black text-gray-400 uppercase">Lazy Loading Frames</span>
+                <div className="w-12 h-7 bg-blue-600 rounded-full relative shadow-lg shadow-blue-900/20">
+                  <div className="absolute right-1 top-1 w-5 h-5 bg-white rounded-full"></div>
                 </div>
               </div>
             </div>
@@ -118,14 +122,14 @@ export function PlaceholderView({ type }: PlaceholderViewProps) {
       ) : (
         <div className="flex flex-col gap-4">
           {content.items.map((item, i) => (
-            <div key={i} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div key={i} className="p-5 bg-[#161e2d] rounded-2xl border border-white/5 shadow-xl flex items-center justify-between group hover:border-white/10 transition-all">
               <div>
-                <h4 className="text-sm font-bold text-gray-800">{item.title}</h4>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase font-bold">
+                <h4 className="text-sm font-bold text-gray-200 group-hover:text-white transition-colors">{item.title}</h4>
+                <p className="text-[9px] text-gray-500 mt-1 uppercase font-black tracking-widest">
                   {('date' in item) ? item.date : item.category}
                 </p>
               </div>
-              <ExternalLink size={16} className="text-gray-300" />
+              <ExternalLink size={18} className="text-gray-600 group-hover:text-blue-500 transition-colors" />
             </div>
           ))}
         </div>

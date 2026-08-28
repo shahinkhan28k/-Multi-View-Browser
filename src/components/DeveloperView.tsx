@@ -34,10 +34,17 @@ export function DeveloperView() {
   useEffect(() => {
     const savedLinks = localStorage.getItem('developer_links');
     if (savedLinks) {
-      const parsed = JSON.parse(savedLinks);
-      // Ensure passcode exists even in old saved data
-      if (!parsed.passcode) parsed.passcode = '2026';
-      setLinks(parsed);
+      try {
+        const parsed = JSON.parse(savedLinks);
+        // Merge with defaults to ensure no field is undefined (fixes controlled/uncontrolled warning)
+        setLinks(prev => ({
+          ...prev,
+          ...parsed,
+          passcode: parsed.passcode || prev.passcode
+        }));
+      } catch (e) {
+        console.error('Failed to parse saved links', e);
+      }
     }
   }, []);
 
@@ -68,34 +75,37 @@ export function DeveloperView() {
   ];
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-24 bg-slate-50/50">
+    <div className="flex flex-col h-full overflow-y-auto pb-32 bg-[#0a0f1a] scrollbar-hide">
       {/* Banner Section */}
-      <div className="relative h-56 w-full overflow-hidden bg-gray-200 shadow-inner">
+      <div className="relative h-64 w-full flex-shrink-0 overflow-hidden bg-slate-900 shadow-2xl">
         <img 
           src={links.banner} 
           alt="Cover" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-70"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop';
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/20 to-transparent" />
         
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-30">
+        <div className="absolute top-6 right-6 flex items-center gap-2 z-30">
           <button 
             onClick={() => isAdmin ? handleSave() : setShowLogin(!showLogin)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-full backdrop-blur-lg transition-all shadow-xl font-bold text-sm ${
+            className={`flex items-center gap-2 px-5 py-3 rounded-2xl backdrop-blur-xl transition-all shadow-2xl font-black text-xs tracking-widest ${
               isAdmin 
-                ? 'bg-blue-600 text-white hover:bg-blue-700 ring-4 ring-blue-500/20' 
-                : 'bg-white/20 text-white hover:bg-white/40'
+                ? 'bg-blue-600 text-white hover:bg-blue-500 ring-4 ring-blue-500/20' 
+                : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
             }`}
           >
             {isAdmin ? (
               <>
                 <Save size={18} />
-                <span>Save Changes</span>
+                <span>SAVE CHANGES</span>
               </>
             ) : (
               <>
                 <Lock size={18} />
-                <span>Admin Login</span>
+                <span>ADMIN LOGIN</span>
               </>
             )}
           </button>
@@ -103,55 +113,55 @@ export function DeveloperView() {
       </div>
 
       {/* Profile Info Section */}
-      <div className="px-6 -mt-8 relative z-10">
-        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/40 p-6 border border-gray-50/50">
-          <div className="flex flex-col gap-5">
+      <div className="px-6 -mt-16 relative z-10">
+        <div className="bg-[#161e2d] rounded-[2rem] shadow-2xl shadow-black/60 p-8 border border-white/5">
+          <div className="flex flex-col gap-6">
             {isAdmin ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">ব্যানার ফটো লিঙ্ক (Banner URL)</label>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] block ml-1">ব্যানার ফটো লিঙ্ক (Banner URL)</label>
                   <input 
                     type="text"
                     value={links.banner}
                     onChange={(e) => setLinks({...links, banner: e.target.value})}
-                    className="w-full h-11 bg-white rounded-xl px-4 text-xs border-2 border-gray-200 focus:border-blue-500 outline-none shadow-sm"
+                    className="w-full h-14 bg-white/5 rounded-2xl px-5 text-xs border-2 border-white/5 focus:border-blue-500 outline-none text-white transition-all placeholder:text-gray-600"
                     placeholder="পিকচার লিঙ্ক এখানে দিন"
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">আপনার নাম (Name)</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] block ml-1">আপনার নাম (Name)</label>
                   <input 
                     type="text"
                     value={links.name}
                     onChange={(e) => setLinks({...links, name: e.target.value})}
-                    className="w-full h-11 bg-white rounded-xl px-4 text-sm font-bold border-2 border-gray-200 focus:border-blue-500 outline-none shadow-sm"
+                    className="w-full h-14 bg-white/5 rounded-2xl px-5 text-sm font-bold border-2 border-white/5 focus:border-blue-500 outline-none text-white transition-all"
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">আপনার সম্পর্কে (Bio)</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] block ml-1">আপনার সম্পর্কে (Bio)</label>
                   <textarea 
                     value={links.bio}
                     onChange={(e) => setLinks({...links, bio: e.target.value})}
-                    rows={2}
-                    className="w-full bg-white rounded-xl p-4 text-sm font-medium border-2 border-gray-200 focus:border-blue-500 outline-none resize-none shadow-sm"
+                    rows={3}
+                    className="w-full bg-white/5 rounded-2xl p-5 text-sm font-medium border-2 border-white/5 focus:border-blue-500 outline-none resize-none text-white transition-all"
                   />
                 </div>
-                <div className="pt-3 border-t border-gray-100">
-                  <label className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1 block">পাসকোড পরিবর্তন করুন (Change Passcode)</label>
+                <div className="pt-6 border-t border-white/5 space-y-2">
+                  <label className="text-[10px] font-black text-red-400 uppercase tracking-[0.2em] block ml-1">পাসকোড পরিবর্তন করুন (Change Passcode)</label>
                   <input 
                     type="text"
                     maxLength={10}
                     value={links.passcode}
                     onChange={(e) => setLinks({...links, passcode: e.target.value.replace(/\D/g, '')})}
-                    className="w-full h-11 bg-red-50/50 rounded-xl px-4 text-sm font-black tracking-[0.5em] border-2 border-red-100 focus:border-red-500 outline-none text-red-600 shadow-sm"
+                    className="w-full h-14 bg-red-500/10 rounded-2xl px-5 text-sm font-black tracking-[0.5em] border-2 border-red-500/20 focus:border-red-500 outline-none text-red-400 transition-all"
                   />
                 </div>
               </div>
             ) : (
-              <div className="text-center">
-                <h2 className="text-2xl font-black text-gray-900 tracking-tight">{links.name}</h2>
-                <div className="w-12 h-1 bg-blue-500 mx-auto mt-2 rounded-full opacity-20" />
-                <p className="mt-4 text-sm text-gray-500 font-medium leading-relaxed px-2">
+              <div className="text-center py-2">
+                <h2 className="text-2xl font-black text-white tracking-tight leading-tight">{links.name}</h2>
+                <div className="w-16 h-1.5 bg-blue-500 mx-auto mt-4 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.6)]" />
+                <p className="mt-6 text-sm text-gray-400 font-medium leading-relaxed px-2">
                   {links.bio}
                 </p>
               </div>
@@ -162,22 +172,22 @@ export function DeveloperView() {
 
       {showLogin && (
         <div className="px-6 mt-6">
-          <form onSubmit={handleLogin} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-gray-400 uppercase">Admin Verification</label>
-              <Unlock size={14} className="text-gray-300" />
+          <form onSubmit={handleLogin} className="p-5 bg-[#161e2d] rounded-2xl border border-white/5 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Admin Verification</label>
+              <Unlock size={14} className="text-blue-500" />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <input 
                 type="password"
                 maxLength={10}
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="••••••••••"
-                className="flex-1 h-12 bg-gray-50 rounded-xl px-4 text-center tracking-[0.5em] font-bold outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 h-12 bg-white/5 rounded-xl px-4 text-center tracking-[0.5em] font-black text-white outline-none border-2 border-white/5 focus:border-blue-500 transition-all"
               />
-              <button type="submit" className="px-6 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 active:scale-95 transition-transform">
-                Verify
+              <button type="submit" className="px-6 bg-blue-600 text-white rounded-xl font-black text-sm shadow-xl shadow-blue-900/20 active:scale-95 transition-all">
+                VERIFY
               </button>
             </div>
           </form>
@@ -185,34 +195,34 @@ export function DeveloperView() {
       )}
 
       {/* Social Links Grid */}
-      <div className="px-6 mt-6">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-1">Connect with me</h3>
+      <div className="px-6 mt-8">
+        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-5 px-1">Connect with me</h3>
         <div className="grid grid-cols-2 gap-4">
           {socialItems.map((item) => {
             const key = item.id as keyof SocialLinks;
             return (
-              <div key={item.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all">
-                <div className="flex flex-col items-center gap-3">
-                  <div className={`w-12 h-12 ${item.bgColor} ${item.color} rounded-2xl flex items-center justify-center`}>
-                    <item.icon size={24} />
+              <div key={item.id} className="bg-[#161e2d] rounded-2xl border border-white/5 p-5 shadow-lg hover:border-white/10 transition-all group">
+                <div className="flex flex-col items-center gap-4">
+                  <div className={`w-14 h-14 ${item.bgColor.replace('bg-', 'bg-opacity-10 bg-')} ${item.color} rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300`}>
+                    <item.icon size={28} />
                   </div>
-                  <span className="font-bold text-gray-800 text-xs">{item.label}</span>
+                  <span className="font-black text-gray-300 text-[10px] uppercase tracking-widest">{item.label}</span>
                   
                   {isAdmin ? (
                     <input 
                       type="text"
                       value={links[key as keyof SocialLinks] as string}
                       onChange={(e) => setLinks({...links, [key]: e.target.value})}
-                      className="w-full h-8 bg-gray-50 rounded-lg px-2 text-[10px] border border-transparent focus:border-blue-500 outline-none"
+                      className="w-full h-9 bg-white/5 rounded-lg px-3 text-[10px] border border-white/10 focus:border-blue-500 outline-none text-white font-medium"
                     />
                   ) : (
                     <a 
                       href={links[key as keyof SocialLinks] as string} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="w-full h-9 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                      className="w-full h-11 bg-white/5 text-gray-400 rounded-xl flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all border border-white/5 group-hover:border-blue-500/50"
                     >
-                      <ExternalLink size={14} />
+                      <ExternalLink size={16} />
                     </a>
                   )}
                 </div>

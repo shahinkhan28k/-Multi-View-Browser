@@ -121,13 +121,18 @@ export function GridView({ url, count, onBack }: GridViewProps) {
 
   if (!videoId) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-50">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-6">
-          <AlertCircle size={40} />
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-[#0a0f1a]">
+        <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 mb-8 shadow-inner">
+          <AlertCircle size={48} strokeWidth={2.5} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Unsupported URL</h2>
-        <p className="text-gray-500 mb-8 max-w-xs">We couldn't find a valid YouTube ID in that link. Try a standard video or shorts URL.</p>
-        <button onClick={onBack} className="px-8 h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200">Go Back</button>
+        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Unsupported URL</h2>
+        <p className="text-gray-500 mb-10 max-w-xs font-medium leading-relaxed">We couldn't find a valid YouTube ID. Please use a standard video, shorts, or live URL.</p>
+        <button 
+          onClick={onBack} 
+          className="px-10 h-14 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-900/20 active:scale-95 transition-all"
+        >
+          GO BACK
+        </button>
       </div>
     );
   }
