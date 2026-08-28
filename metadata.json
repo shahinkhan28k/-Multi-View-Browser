@@ -1,0 +1,6 @@
+{
+  "name": "Multi View Browser",
+  "description": "High-performance multi-stream viewer supporting up to 1,000 concurrent YouTube screens with lazy-loading virtualization and universal URL parsing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
