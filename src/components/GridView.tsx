@@ -137,15 +137,10 @@ export function GridView({ url, count, onBack }: GridViewProps) {
     );
   }
 
-  // Optimized grid columns for high counts
+  // Optimized grid columns for mobile first (2 columns) and scaling up for larger screens
   const getGridCols = () => {
     if (count <= 1) return 'grid-cols-1';
-    if (count <= 4) return 'grid-cols-2';
-    if (count <= 9) return 'grid-cols-3';
-    if (count <= 16) return 'grid-cols-4';
-    if (count <= 36) return 'grid-cols-6';
-    if (count <= 100) return 'grid-cols-8 md:grid-cols-10 lg:grid-cols-12';
-    return 'grid-cols-10 sm:grid-cols-12 md:grid-cols-16 lg:grid-cols-20';
+    return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8';
   };
 
   return (

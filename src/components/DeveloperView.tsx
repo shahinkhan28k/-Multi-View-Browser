@@ -79,7 +79,7 @@ export function DeveloperView() {
       {/* Banner Section */}
       <div className="relative h-64 w-full flex-shrink-0 overflow-hidden bg-slate-900 shadow-2xl">
         <img 
-          src={links.banner} 
+          src={links.banner || null} 
           alt="Cover" 
           className="w-full h-full object-cover opacity-70"
           onError={(e) => {
