@@ -1,18 +1,44 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
 import { ArrowLeft, Volume2, VolumeX, Timer, RefreshCw, AlertCircle, Globe, ShieldCheck, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProxyInfo } from '../types';
 
+const LOCATIONS = [
+  { name: 'NEW YORK, US', flag: '🇺🇸' },
+  { name: 'LONDON, UK', flag: '🇬🇧' },
+  { name: 'TOKYO, JP', flag: '🇯🇵' },
+  { name: 'FRANKFURT, DE', flag: '🇩🇪' },
+  { name: 'SINGAPORE, SG', flag: '🇸🇬' },
+  { name: 'SYDNEY, AU', flag: '🇦🇺' },
+  { name: 'PARIS, FR', flag: '🇫🇷' },
+  { name: 'MUMBAI, IN', flag: '🇮🇳' }
+];
+
 function getYouTubeId(url: string) {
-  // Robust parser for: shorts, live, standard watch, youtu.be, embed
   const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = url.match(regExp);
   return match ? match[1] : null;
 }
 
-const getStreamUrl = (vid: string, _isMuted: boolean) => {
+const getBrowserUrl = (input: string, sessionKey: string) => {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  return `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=1&enablejsapi=1&origin=${origin}&widget_referrer=${origin}`;
+  const trimmedInput = input.trim();
+
+  // URL detection
+  if (trimmedInput.includes('.') && !trimmedInput.includes(' ')) {
+    const url = trimmedInput.startsWith('http') ? trimmedInput : `https://${trimmedInput}`;
+    
+    // Google Search is better handled with igu=1 directly
+    if (url.includes('google.com') && !url.includes('search')) {
+      return `https://www.google.com/search?q=google&igu=1`;
+    }
+
+    // Default to Proxy Engine to bypass X-Frame-Options for ALL sites
+    return `${origin}/api/browse?url=${encodeURIComponent(url)}&session=${sessionKey}`;
+  }
+
+  // Default: Google Search with iframe support (igu=1)
+  return `https://www.google.com/search?q=${encodeURIComponent(trimmedInput)}&igu=1&session=${sessionKey}`;
 };
 
 interface GridViewProps {
@@ -21,70 +47,121 @@ interface GridViewProps {
   onBack: () => void;
 }
 
-// Sub-component to handle lazy mounting of iframes with Proxy info
-function LazyIframe({ videoId, isMuted, index, proxy }: { videoId: string; isMuted: boolean; index: number; proxy?: ProxyInfo; key?: any }) {
+// Sub-component to handle lazy mounting of iframes with Browser UI
+function LazyIframe({ initialUrl, index }: { videoId: string | null; initialUrl: string; isMuted: boolean; index: number; proxy?: ProxyInfo; key?: any }) {
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [sessionKey, setSessionKey] = useState(() => Math.random().toString(36).substring(7));
+  const [location, setLocation] = useState(() => LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)]);
+  const [currentUrl, setCurrentUrl] = useState(initialUrl);
+  const [inputValue, setInputValue] = useState(initialUrl);
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsIntersecting(true);
+          observer.disconnect();
+        }
       },
-      { rootMargin: '200px' }
+      { threshold: 0.1 }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
+    if (containerRef.current) observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentUrl(inputValue);
+    setSessionKey(Math.random().toString(36).substring(7));
+  };
+
+  const refreshSession = () => {
+    setSessionKey(Math.random().toString(36).substring(7));
+    setLocation(LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)]);
+    if (iframeRef.current) {
+      iframeRef.current.src = iframeRef.current.src;
+    }
+  };
+
   return (
-    <div ref={containerRef} className="aspect-video bg-gray-900 rounded-lg overflow-hidden relative group border border-gray-800">
-      {isIntersecting ? (
-        <iframe
-          className="w-full h-full"
-          src={getStreamUrl(videoId, isMuted)}
-          title={`Video ${index + 1}`}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-800">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      
-      {/* Proxy & Info Overlay */}
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-2">
-        <div className="flex justify-between items-start">
-          <span className="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[8px] text-white font-bold tracking-tight">
-            #{index + 1}
-          </span>
-          {proxy && (
-            <div className="bg-blue-600/90 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1">
-              <Globe size={8} className="text-white" />
-              <span className="text-[7px] text-white font-bold uppercase truncate max-w-[60px]">
-                {proxy.location}
-              </span>
-            </div>
-          )}
+    <div ref={containerRef} className="aspect-video bg-[#0d1117] rounded-2xl overflow-hidden relative group border border-white/5 shadow-2xl flex flex-col">
+      {/* Mini Browser Toolbar */}
+      <div className="h-8 bg-[#161b22] border-b border-white/5 flex items-center px-2 gap-2 z-10 pointer-events-auto">
+        <div className="flex gap-1">
+          <div className="w-2 h-2 rounded-full bg-red-500/50" />
+          <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+          <div className="w-2 h-2 rounded-full bg-green-500/50" />
         </div>
         
-        {proxy && (
-          <div className="bg-black/70 backdrop-blur-md p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex items-center justify-between text-[6px] text-gray-300 font-medium">
-              <div className="flex items-center gap-1">
-                <ShieldCheck size={6} className="text-green-400" />
-                <span>IP: {proxy.ip}</span>
-              </div>
-              <span>{proxy.latency}</span>
-            </div>
+        <form onSubmit={handleSearch} className="flex-1 flex items-center bg-black/40 rounded-md px-2 h-5 border border-white/5">
+          <Globe size={8} className="text-white/30 mr-1.5" />
+          <input 
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="flex-1 bg-transparent text-[8px] text-white/70 outline-none font-mono"
+            placeholder="Search or enter URL..."
+          />
+        </form>
+
+        <button onClick={refreshSession} className="text-white/30 hover:text-white transition-colors">
+          <RefreshCw size={10} />
+        </button>
+      </div>
+
+      <div className="flex-1 relative">
+        {isIntersecting ? (
+          <iframe
+            ref={iframeRef}
+            className="w-full h-full"
+            src={getBrowserUrl(currentUrl, sessionKey)}
+            title={`Browser ${index + 1}`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-[#0d1117]">
+            <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
           </div>
         )}
+        
+        {/* Premium Overlay UI */}
+        <div className="absolute inset-0 pointer-events-none p-3 flex flex-col justify-between pt-1">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <span className="bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] text-white/50 font-black border border-white/10">
+                #{index + 1}
+              </span>
+              <motion.div 
+                key={sessionKey}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-blue-600/80 backdrop-blur-md px-2 py-1 rounded-md border border-blue-400/30 flex items-center gap-1.5 shadow-lg"
+              >
+                <Globe size={10} className="text-white animate-pulse" />
+                <span className="text-[9px] text-white font-black uppercase tracking-tight">
+                  {location.name}
+                </span>
+              </motion.div>
+            </div>
+          </div>
+          
+          {/* Fake Browser Progress Bar (Bottom) */}
+          <div className="space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -94,7 +171,6 @@ export function GridView({ url, count, onBack }: GridViewProps) {
   const [seconds, setSeconds] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [proxies, setProxies] = useState<ProxyInfo[]>([]);
   const [showOverlay, setShowOverlay] = useState(true);
   const videoId = getYouTubeId(url);
 
@@ -105,43 +181,10 @@ export function GridView({ url, count, onBack }: GridViewProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch proxy metadata from backend
-  useEffect(() => {
-    const fetchProxies = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
-        const response = await fetch(`${backendUrl}/api/proxy-config?count=${Math.min(count, 100)}`);
-        const data = await response.json();
-        setProxies(data.proxies);
-      } catch (err) {
-        console.error('Failed to fetch proxy config:', err);
-      }
-    };
-    fetchProxies();
-  }, [count]);
-
   const handleRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => setIsRefreshing(false), 500);
   };
-
-  if (!videoId) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-[#0a0f1a]">
-        <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 mb-8 shadow-inner">
-          <AlertCircle size={48} strokeWidth={2.5} />
-        </div>
-        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Unsupported URL</h2>
-        <p className="text-gray-500 mb-10 max-w-xs font-medium leading-relaxed">We couldn't find a valid YouTube ID. Please use a standard video, shorts, or live URL.</p>
-        <button 
-          onClick={onBack} 
-          className="px-10 h-14 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-900/20 active:scale-95 transition-all"
-        >
-          GO BACK
-        </button>
-      </div>
-    );
-  }
 
   // Optimized grid columns for mobile first (2 columns) and scaling up for larger screens
   const getGridCols = () => {
@@ -152,53 +195,52 @@ export function GridView({ url, count, onBack }: GridViewProps) {
   return (
     <div className="flex flex-col h-full bg-black overflow-hidden">
       {/* Top Header */}
-      <header className="h-16 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 flex items-center justify-between px-4 sticky top-0 z-20 shadow-xl">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 text-white hover:bg-gray-800 rounded-xl transition-colors">
-            <ArrowLeft size={24} />
+      <header className="h-16 bg-[#0a0f1a] border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-20 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 text-white/80 hover:text-white hover:bg-white/5 rounded-2xl transition-all active:scale-90">
+            <ArrowLeft size={24} strokeWidth={2.5} />
           </button>
           <div className="flex flex-col">
-            <span className="text-white text-sm font-black tracking-tight leading-none">
-              {count.toLocaleString()} VIEWS
+            <span className="text-white text-lg font-black tracking-tighter leading-none uppercase italic">
+              {count} Browsers
             </span>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-400 font-bold mt-1 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] text-blue-500 font-black mt-1 uppercase tracking-[0.2em]">
               <Timer size={12} className="text-blue-500" />
-              <span>{seconds}s SESSION</span>
+              <span>{seconds}s Active</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button 
             onClick={handleRefresh}
             title="Refresh All"
-            className={`p-2.5 text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition-all ${isRefreshing ? 'rotate-180 opacity-50' : ''}`}
+            className={`p-3 text-white/80 bg-white/5 hover:bg-white/10 hover:text-white rounded-[1.2rem] border border-white/5 transition-all active:scale-90 ${isRefreshing ? 'rotate-180 opacity-50' : ''}`}
           >
-            <RefreshCw size={20} />
+            <RefreshCw size={22} />
           </button>
           <button 
             onClick={() => setIsMuted(!isMuted)}
-            className={`h-11 flex items-center gap-2 px-4 rounded-xl font-bold text-sm transition-all shadow-lg ${
+            className={`w-12 h-12 flex items-center justify-center rounded-[1.2rem] transition-all border shadow-2xl active:scale-90 ${
               isMuted 
-                ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20'
+                ? 'bg-white/5 text-white/40 border-white/5' 
+                : 'bg-blue-600 text-white border-blue-400/30 shadow-blue-500/20'
             }`}
           >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            <span className="hidden sm:inline">{isMuted ? 'Muted' : 'Sound On'}</span>
+            {isMuted ? <VolumeX size={22} /> : <Volume2 size={22} />}
           </button>
         </div>
       </header>
 
       {/* Virtualized/Lazy Grid Content */}
-      <div className={`flex-1 overflow-y-auto p-1.5 grid ${getGridCols()} gap-1.5 content-start scroll-smooth relative`}>
+      <div className={`flex-1 overflow-y-auto p-2 grid ${getGridCols()} gap-2 content-start scroll-smooth relative bg-[#05080f]`}>
         {!isRefreshing && Array.from({ length: count }).map((_, i) => (
           <LazyIframe 
             key={`${i}-${isRefreshing}`} 
             videoId={videoId} 
+            initialUrl={url}
             isMuted={isMuted} 
             index={i} 
-            proxy={proxies[i % (proxies.length || 1)]}
           />
         ))}
 
@@ -223,7 +265,7 @@ export function GridView({ url, count, onBack }: GridViewProps) {
                     setShowOverlay(false);
                     setIsMuted(false);
                   }}
-                  className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black tracking-widest text-xs shadow-xl shadow-blue-900/20 active:scale-95 transition-all"
+                  className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[1.5rem] font-black tracking-[0.2em] text-xs shadow-2xl shadow-blue-900/40 active:scale-95 transition-all border border-blue-400/20"
                 >
                   START ALL STREAMS
                 </button>

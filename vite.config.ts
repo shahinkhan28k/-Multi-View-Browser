@@ -9,25 +9,6 @@ export default defineConfig(() => {
     plugins: [
       react(), 
       tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico'],
-        manifest: {
-          id: '/',
-          name: 'Multi View Browser',
-          short_name: 'MultiView',
-          description: 'A premium mobile multi-view YouTube video player.',
-          theme_color: '#0a0f1a',
-          background_color: '#0a0f1a',
-          display: 'standalone',
-          start_url: '/',
-          scope: '/',
-          icons: [],
-        },
-        devOptions: {
-          enabled: true,
-        },
-      }),
     ],
     resolve: {
       alias: {

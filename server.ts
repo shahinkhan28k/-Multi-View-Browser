@@ -41,6 +41,69 @@ async function startServer() {
     });
   });
 
+  // Advanced Multi-Browser Proxy Engine
+  app.get('/api/browse', async (req, res) => {
+    const targetUrl = req.query.url as string;
+    if (!targetUrl) return res.status(400).send('URL is required');
+
+    try {
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9'
+        }
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        let html = await response.text();
+        const urlObj = new URL(targetUrl);
+        const origin = urlObj.origin;
+        const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
+
+        // 1. Inject Base Tag to fix relative assets
+        html = html.replace('<head>', `<head><base href="${origin}/">`);
+
+        // 2. Remove Frame-Blocking Scripts and Headers
+        html = html.replace(/X-Frame-Options/gi, 'DISABLED');
+        html = html.replace(/frame-ancestors/gi, 'none');
+        
+        // 3. Inject a script to intercept clicks and keep them in the proxy
+        const interceptorScript = `
+          <script>
+            document.addEventListener('click', function(e) {
+              const link = e.target.closest('a');
+              if (link && link.href && link.href.startsWith('http')) {
+                e.preventDefault();
+                const proxyUrl = window.location.origin + '/api/browse?url=' + encodeURIComponent(link.href);
+                window.location.href = proxyUrl;
+              }
+            });
+          </script>
+        `;
+        html = html.replace('</body>', `${interceptorScript}</body>`);
+
+        // 4. Set Headers to allow framing
+        res.setHeader('Content-Security-Policy', "frame-ancestors *");
+        res.setHeader('X-Frame-Options', 'ALLOWALL');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
+      } else {
+        // Redirect non-HTML assets directly
+        res.redirect(targetUrl);
+      }
+    } catch (error) {
+      res.status(500).send(`
+        <div style="font-family: sans-serif; padding: 20px; color: #fff; background: #0a0f1a;">
+          <h2 style="color: #ff4444;">Browser Error</h2>
+          <p>Unable to load: ${targetUrl}</p>
+          <small>${error}</small>
+        </div>
+      `);
+    }
+  });
+
   // Health Check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });

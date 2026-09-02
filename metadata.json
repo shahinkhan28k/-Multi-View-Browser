@@ -1,6 +1,6 @@
 {
-  "name": "Multi View Browser",
-  "description": "High-performance multi-stream viewer supporting up to 1,000 concurrent YouTube screens with lazy-loading virtualization and universal URL parsing.",
+  "name": "Ultra Search Engine",
+  "description": "A high-performance multi-browser search engine with built-in proxy to bypass framing restrictions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
