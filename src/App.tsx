@@ -11,7 +11,9 @@ import { HistoryView } from './components/HistoryView';
 import { GridView } from './components/GridView';
 import { PlaceholderView } from './components/PlaceholderView';
 import { DeveloperView } from './components/DeveloperView';
+import { PWAInstallButton } from './components/PWAInstallButton';
 import { motion, AnimatePresence } from 'motion/react';
+import { Smartphone } from 'lucide-react';
 
 export default function App() {
   const [activeView, setActiveView] = useState<ViewType>('Home');
@@ -92,6 +94,19 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-[#0a0f1a] text-gray-100 overflow-hidden select-none">
+      {/* Top Mobile Header */}
+      {activeView !== 'Grid' && (
+        <header className="h-16 flex-shrink-0 bg-[#0a0f1a] border-b border-white/5 flex items-center justify-between px-6 z-50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Smartphone size={18} className="text-white" />
+            </div>
+            <span className="text-lg font-black tracking-tighter text-white">MultiView</span>
+          </div>
+          <PWAInstallButton />
+        </header>
+      )}
+
       <main className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div

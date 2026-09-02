@@ -1,7 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Volume2, VolumeX, Timer, RefreshCw, AlertCircle, Globe, ShieldCheck } from 'lucide-react';
-import { motion } from 'motion/react';
+import { ArrowLeft, Volume2, VolumeX, Timer, RefreshCw, AlertCircle, Globe, ShieldCheck, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ProxyInfo } from '../types';
+
+function getYouTubeId(url: string) {
+  // Robust parser for: shorts, live, standard watch, youtu.be, embed
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+}
+
+const getStreamUrl = (vid: string, _isMuted: boolean) => {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=1&enablejsapi=1&origin=${origin}&widget_referrer=${origin}`;
+};
 
 interface GridViewProps {
   url: string;
@@ -34,10 +46,10 @@ function LazyIframe({ videoId, isMuted, index, proxy }: { videoId: string; isMut
       {isIntersecting ? (
         <iframe
           className="w-full h-full"
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${videoId}&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}&rel=0&modestbranding=1&widget_referrer=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+          src={getStreamUrl(videoId, isMuted)}
           title={`Video ${index + 1}`}
           frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
         />
       ) : (
@@ -83,6 +95,7 @@ export function GridView({ url, count, onBack }: GridViewProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [proxies, setProxies] = useState<ProxyInfo[]>([]);
+  const [showOverlay, setShowOverlay] = useState(true);
   const videoId = getYouTubeId(url);
 
   useEffect(() => {
@@ -106,13 +119,6 @@ export function GridView({ url, count, onBack }: GridViewProps) {
     };
     fetchProxies();
   }, [count]);
-
-  function getYouTubeId(url: string) {
-    // Robust parser for: shorts, live, standard watch, youtu.be, embed
-    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regExp);
-    return match ? match[1] : null;
-  }
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -185,16 +191,46 @@ export function GridView({ url, count, onBack }: GridViewProps) {
       </header>
 
       {/* Virtualized/Lazy Grid Content */}
-      <div className={`flex-1 overflow-y-auto p-1.5 grid ${getGridCols()} gap-1.5 content-start scroll-smooth`}>
+      <div className={`flex-1 overflow-y-auto p-1.5 grid ${getGridCols()} gap-1.5 content-start scroll-smooth relative`}>
         {!isRefreshing && Array.from({ length: count }).map((_, i) => (
           <LazyIframe 
-            key={i} 
+            key={`${i}-${isRefreshing}`} 
             videoId={videoId} 
             isMuted={isMuted} 
             index={i} 
             proxy={proxies[i % (proxies.length || 1)]}
           />
         ))}
+
+        <AnimatePresence>
+          {showOverlay && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md p-6"
+            >
+              <div className="bg-[#161e2d] p-10 rounded-[3rem] border border-white/10 shadow-2xl text-center max-w-xs">
+                <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/40">
+                  <Play size={32} className="text-white ml-1" fill="currentColor" />
+                </div>
+                <h3 className="text-xl font-black text-white mb-2">Ready to Load?</h3>
+                <p className="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
+                  Tap below to initialize independent audio contexts for all screens.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowOverlay(false);
+                    setIsMuted(false);
+                  }}
+                  className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black tracking-widest text-xs shadow-xl shadow-blue-900/20 active:scale-95 transition-all"
+                >
+                  START ALL STREAMS
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Floating Performance Indicator */}
